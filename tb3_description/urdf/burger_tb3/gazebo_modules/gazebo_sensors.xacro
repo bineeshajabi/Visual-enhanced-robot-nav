@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Gazebo Lidar Plugin -->
+  <gazebo reference="base_scan">
+    <sensor name="gpu_lidar" type="gpu_lidar">
+      <visualize>true</visualize>
+      <update_rate>20</update_rate>
+      <topic>scan</topic>
+      <gz_frame_id>base_scan</gz_frame_id>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <min_angle>-3.14</min_angle>
+            <max_angle>3.14</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>50</max>
+        </range>
+        <frame_id>base_scan</frame_id>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <gazebo>
+     <plugin name='gz::sim::systems::Sensors' filename='gz-sim-sensors-system'>
+        <render_engine>ogre2</render_engine>
+    </plugin>
+  </gazebo>
+
+  <!-- IMU plugin-->
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <topic>imu/data</topic>
+      <update_rate>15.0</update_rate>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <gz_frame_id>imu_link</gz_frame_id>
+    </sensor>
+   </gazebo>
+  <gazebo>
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu">
+    </plugin>
+  </gazebo>
+</robot>
