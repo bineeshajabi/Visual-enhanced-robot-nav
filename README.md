@@ -56,54 +56,54 @@ Visual-enhanced-robot-nav/
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                            GAZEBO SIM (my_world.sdf)                        ║
+║                            GAZEBO SIM (my_world.sdf)                         ║
 ║                                                                              ║
-║   ┌─────────────────────┐          ┌──────────────────────────────────────┐ ║
+║   ┌──────────────────────┐          ┌──────────────────────────────────────┐ ║
 ║   │   TurtleBot3 Burger  │          │      Aerial RGBD Camera (static)     │ ║
 ║   │  ├─ LiDAR            │          │  ├─ /aerial_rgbd_camera/image        │ ║
 ║   │  ├─ Wheel Encoders   │          │  ├─ /aerial_rgbd_camera/depth_image  │ ║
 ║   │  └─ IMU              │          │  └─ /aerial_rgbd_camera/points       │ ║
-║   └──────────┬──────────┘          └──────────────────┬───────────────────┘ ║
-║              │ /scan  /odom  /imu/data  /tf             │ PointCloud2         ║
-╚══════════════╪═════════════════════════════════════════╪════════════════════╝
+║   └──────────┬───────────┘          └──────────────────┬───────────────────┘ ║
+║              │ /scan  /odom  /imu/data  /tf             │ PointCloud2        ║
+╚══════════════╪═════════════════════════════════════════╪═════════════════════╝
                │                                         │
                └──────────────┬──────────────────────────┘
-                               │  ros_gz_bridge  (gz_bridge.yaml)
-                               ▼
+                              │  ros_gz_bridge  (gz_bridge.yaml)
+                              ▼
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                               ROS 2 LAYER                                   ║
+║                               ROS 2 LAYER                                    ║
 ║                                                                              ║
-║  ┌────────────────────────┐    ┌───────────────────────────────────────────┐║
+║  ┌─────────────────────────┐    ┌───────────────────────────────────────────┐║
 ║  │  robot_state_publisher  │    │          robot_localization EKF           │║
-║  │  (URDF xacro → /tf)     │    │  odom0: /odom    → vx, vyaw (vel only)   │║
-║  └────────────────────────┘    │  imu0:  /imu/data → yaw, vyaw             │║
+║  │  (URDF xacro → /tf)     │    │  odom0: /odom    → vx, vyaw (vel only)    │║
+║  └─────────────────────────┘    │  imu0:  /imu/data → yaw, vyaw             │║
 ║                                 │  publishes: odom → base_footprint TF      │║
-║  ┌────────────────────────┐    └───────────────────┬───────────────────────┘║
-║  │  static_tf_publisher    │                        │                        ║
-║  │  aerial_cam/link →      │    ┌───────────────────▼───────────────────────┐║
+║  ┌─────────────────────────┐    └────────────────┬──────────────────────────┘║
+║  │  static_tf_publisher    │                     │                           ║
+║  │  aerial_cam/link →      │    ┌────────────────▼──────────────────────────┐║
 ║  │  optical_frame (RPY)    │    │             slam_toolbox                  │║
-║  └────────────────────────┘    │  mapping mode:  builds /map from /scan    │║
+║  └─────────────────────────┘    │  mapping mode:  builds /map from /scan    │║
 ║                                 │  localize mode: loads serialized map      │║
 ║                                 │  publishes: map → odom TF                 │║
 ║                                 └───────────────────┬───────────────────────┘║
-║                                                      │                        ║
-║  ┌───────────────────────────────────────────────────▼───────────────────────┐║
-║  │                            Nav2 Stack                                      │║
-║  │                                                                             │║
-║  │  ┌──────────────────────────────┐   ┌──────────────────────────────────┐  │║
-║  │  │       Global Costmap          │   │         Local Costmap            │  │║
-║  │  │  static_layer   (/map)        │   │  voxel_layer ◄─ /scan (clear+mark)│ │║
-║  │  │  obstacle_layer (/scan)       │   │  voxel_layer ◄─ /aerial_rgbd/    │  │║
-║  │  │  inflation_layer (r=0.70m)    │   │               points (mark only)  │  │║
-║  │  └──────────────┬───────────────┘   └──────────────┬───────────────────┘  │║
-║  │                 │                                   │                       │║
-║  │  ┌──────────────▼───────────────────────────────────▼──────────────────┐  │║
-║  │  │  planner_server (NavFn/A*) → bt_navigator → controller_server (MPPI)│  │║
-║  │  └────────────────────────────────────────────────────────────────────┬┘  │║
-║  │                                                                        │   │║
-║  │              velocity_smoother → collision_monitor → cmd_vel ──────────┘   │║
-║  └─────────────────────────────────────────────────────────────────────────────┘║
-╚══════════════════════════════════════════════════════════════════════════════════╝
+║                                                     │                        ║
+║  ┌──────────────────────────────────────────────────▼───────────────────────┐║
+║  │                            Nav2 Stack                                    │║
+║  │                                                                          │║
+║  │  ┌───────────────────────────────┐   ┌──────────────────────────────────┐│║
+║  │  │       Global Costmap          │   │         Local Costmap            ││║
+║  │  │  static_layer   (/map)        │   │voxel_layer ◄─ /scan              ││║
+║  │  │  obstacle_layer (/scan)       │   │voxel_layer ◄─ /aerial_rgbd/      ││║
+║  │  │  inflation_layer (r=0.70m)    │   │               points             ││║
+║  │  └──────────────┬───────────────┘   └──────────────┬───────────────────┘ │║
+║  │                 │                                  │                     │║
+║  │  ┌──────────────▼──────────────────────────────────▼──────────────────┐  │║
+║  │  │  planner_server → bt_navigator → controller_server (MPPI)          │  │║
+║  │  └───────────────────────────────────────────────────────────────────┬┘  │║
+║  │                                                                      │   │║
+║  │              velocity_smoother → collision_monitor → cmd_vel ────────┘   │║
+║  └──────────────────────────────────────────────────────────────────────────┘║
+╚══════════════════════════════════════════════════════════════════════════════╝
                │ cmd_vel (geometry_msgs/Twist)
                ▼
         ros_gz_bridge → Gazebo robot actuators
@@ -370,6 +370,6 @@ SLAM Toolbox is licensed under LGPL-2.1.
 
 ## Author
 
-**Bineesh Ajabi**  
+**Bineesha Jabi**  
 GitHub: [bineeshajabi](https://github.com/bineeshajabi)  
 Repository: [Visual-enhanced-robot-nav](https://github.com/bineeshajabi/Visual-enhanced-robot-nav)
